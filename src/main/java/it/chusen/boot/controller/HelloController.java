@@ -17,4 +17,10 @@ public class HelloController {
         return "hello world!";
     }
 
+
+    @GetMapping
+    public String hello2() {
+        return "hello world!";
+    }
+
 }
