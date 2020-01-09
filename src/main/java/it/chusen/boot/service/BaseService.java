@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import it.chusen.boot.model.result.PageResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author chusen
  */
+@Slf4j
 @Component
 public class BaseService<T> {
 
@@ -39,7 +39,7 @@ public class BaseService<T> {
     /**
      * 查询列表
      *
-     * @param pageNo             分页参数
+     * @param pageNo             分页参数(从0开始)
      * @param pageSize           分页大小
      * @param predicateList      查询条件
      * @param entityPathBase     查询表
@@ -60,12 +60,15 @@ public class BaseService<T> {
             jpaQuery.orderBy(orderSpecifierList.toArray(new OrderSpecifier[orderSpecifierList.size()]));
         }
         //分页查询
-        if (pageNo != null && pageSize != null) {
-            list = jpaQuery.offset((pageNo - 1) * pageSize).limit(pageSize).fetch();
+        boolean page = pageNo != null && pageSize != null && pageNo >= 0 && pageSize >= 1;
+        if (page) {
+            list = jpaQuery.offset(pageNo * pageSize).limit(pageSize).fetch();
+            return new PageResult<T>(list, pageNo, pageSize, jpaQuery.fetchCount());
         } else {
             list = jpaQuery.fetch();
+            long count = jpaQuery.fetchCount();
+            return new PageResult<T>(list, 0, (int) count, count);
         }
-        return new PageResult<>(list, pageNo, pageSize, jpaQuery.fetchCount());
     }
 
     /**

@@ -1,5 +1,6 @@
 package it.chusen.test;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import it.chusen.boot.BootApplication;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,6 +94,15 @@ public class MyTest {
         System.out.println(pageResult);
 
 
+    }
+    @Test
+    public void testTable() throws Exception {
+        QPmProductEntity pmProductEntity = QPmProductEntity.pmProductEntity;
+        ArrayList<Predicate> list = new ArrayList<>();
+        BooleanExpression booleanExpression = pmProductEntity.brandId.eq(1L);
+        list.add(booleanExpression);
+        PageResult<PmProductEntity> result = productService.queryDsl(0, 10, list, pmProductEntity, null);
+        System.out.println(result);
     }
 
 }
