@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import it.chusen.boot.BootApplication;
+import it.chusen.boot.model.entity.PmBrandEntity;
 import it.chusen.boot.model.entity.PmProductEntity;
 import it.chusen.boot.model.entity.QPmBrandEntity;
 import it.chusen.boot.model.entity.QPmProductEntity;
@@ -56,7 +57,7 @@ public class MyTest {
 
         List<PmProductEntity> products = jpaFactory.select(qPmProductEntity)
                 .from(qPmProductEntity)
-                .innerJoin(qPmBrandEntity)
+                .leftJoin(qPmBrandEntity)
                 .on(qPmProductEntity.brandId.eq(qPmBrandEntity.id))
                 .fetch();
         System.out.println(products);
@@ -77,24 +78,30 @@ public class MyTest {
     @Test
     public void testUtil() throws Exception {
         QueryDslContext queryDslContext = new QueryDslContext();
+        // 表
         queryDslContext.add(QPmProductEntity.pmProductEntity.id.as("id"));
         queryDslContext.add(QPmProductEntity.pmProductEntity.prodName.as("prodName"));
         queryDslContext.add(QPmProductEntity.pmProductEntity.model.as("model"));
         queryDslContext.add(QPmProductEntity.pmProductEntity.price.as("price"));
         queryDslContext.add(QPmBrandEntity.pmBrandEntity.brandName.as("brandName"));
 
-        queryDslContext.add(QPmProductEntity.pmProductEntity);
-        queryDslContext.add(QPmBrandEntity.pmBrandEntity);
+        // 表
+        queryDslContext.table(QPmProductEntity.pmProductEntity)
+                .innerJoin(QPmBrandEntity.pmBrandEntity)
+                .on(QPmProductEntity.pmProductEntity.brandId.eq(QPmBrandEntity.pmBrandEntity.id));
 
-        queryDslContext.add(QPmBrandEntity.pmBrandEntity.id.eq(QPmProductEntity.pmProductEntity.brandId));
+        // 条件
+//        queryDslContext.add(QPmBrandEntity.pmBrandEntity.id.eq(QPmProductEntity.pmProductEntity.brandId));
 
+        // 排序
         queryDslContext.add(QPmProductEntity.pmProductEntity.price.desc());
 
-        PageResult pageResult = productService.queryDslForPageListResult(queryDslContext, ProductVO.class,0, 10);
+        PageResult pageResult = productService.queryDslForPageListResult(queryDslContext, ProductVO.class, 0, 10);
         System.out.println(pageResult);
 
 
     }
+
     @Test
     public void testTable() throws Exception {
         QPmProductEntity pmProductEntity = QPmProductEntity.pmProductEntity;

@@ -5,8 +5,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author chusen
@@ -17,6 +16,12 @@ public class QueryDslContext {
     private List<EntityPath> entityPaths;
     private List<Predicate> predicates;
     private List<OrderSpecifier> orderSpecifiers;
+    public static final String INNER = "inner";
+    public static final String LEFT = "left";
+    public static final String RIGHT = "right";
+    public static final String FIRST = "first";
+    private EntityPath lastTable;
+    private LinkedHashMap<EntityPath, String> tables = new LinkedHashMap<>();
 
     public QueryDslContext() {
         this.expressions = new ArrayList<>();
@@ -24,6 +29,34 @@ public class QueryDslContext {
         this.predicates = new ArrayList<>();
         this.orderSpecifiers = new ArrayList<>();
     }
+
+    public QueryDslContext table(EntityPath entityPath) {
+        tables.put(entityPath, FIRST);
+        return this;
+    }
+
+    public LinkedHashMap<EntityPath, String> getTables() {
+        return this.tables;
+    }
+
+    public QueryDslContext innerJoin(EntityPath entityPath) {
+        tables.put(entityPath, INNER);
+        lastTable = entityPath;
+        return this;
+    }
+
+    public QueryDslContext leftJoin(EntityPath entityPath) {
+        tables.put(entityPath, LEFT);
+        lastTable = entityPath;
+        return this;
+    }
+
+    public QueryDslContext rightJoin(EntityPath<Object> entityPath) {
+        tables.put(entityPath, RIGHT);
+        lastTable = entityPath;
+        return this;
+    }
+
 
     public List<Expression> getExpressions() {
         return expressions;
@@ -61,6 +94,19 @@ public class QueryDslContext {
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
 
+    private Map<EntityPath, List<Predicate>> on = new LinkedHashMap<>();
 
+    public QueryDslContext on(Predicate... predicates) {
+        if (lastTable == null) {
+            throw new RuntimeException("one table can't on! ");
+        }
+        List<Predicate> lists = new ArrayList<>(Arrays.asList(predicates));
+        on.put(lastTable, lists);
+        return this;
+    }
+
+    public Map<EntityPath, List<Predicate>> getOn() {
+        return this.on;
+    }
 
 }

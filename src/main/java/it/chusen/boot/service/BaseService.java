@@ -1,6 +1,7 @@
 package it.chusen.boot.service;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -18,6 +19,8 @@ import javax.persistence.PersistenceContext;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author chusen
@@ -94,16 +97,44 @@ public class BaseService<T> {
      */
     @Transactional(readOnly = true)
     public <U> PageResult queryDslForPageListResult(QueryDslContext qdc, Class<U> clazz, Integer pageNo, Integer pageSize) throws Exception {
-        JPAQuery<Tuple> jpaQuery = queryFactory.select(qdc.expressionToArray())
-                .from(qdc.entityPathToArray())
-                .where(qdc.predicatesToArray());
+        // select 字段
+        JPAQuery<Tuple> jpaQuery = queryFactory.select(qdc.expressionToArray());
+        Map<EntityPath, List<Predicate>> on = qdc.getOn();
+        // from 表
+        for (Map.Entry<EntityPath, String> tableAndType : qdc.getTables().entrySet()) {
+            EntityPath<Object> table = tableAndType.getKey();
+
+            switch (tableAndType.getValue()) {
+                case QueryDslContext.FIRST:
+                    jpaQuery.from(table);
+                    break;
+                case QueryDslContext.INNER:
+                    jpaQuery.innerJoin(table);
+                    on.get(table).forEach(jpaQuery::on);
+                    break;
+                case QueryDslContext.LEFT:
+                    jpaQuery.leftJoin(table);
+                    on.get(table).forEach(jpaQuery::on);
+                    break;
+                case QueryDslContext.RIGHT:
+                    jpaQuery.rightJoin(table);
+                    on.get(table).forEach(jpaQuery::on);
+                    break;
+                default:
+                    throw new RuntimeException("join type error!");
+            }
+        }
+        // where 条件
+        jpaQuery.where(qdc.predicatesToArray());
+
+        // order 条件
         List<Tuple> tuples = jpaQuery.orderBy(qdc.orderSpecifiersToArray())
                 .offset(pageNo * pageSize).limit(pageSize)
                 .fetch();
-        //返回结果
 
-        List<U> list = new LinkedList<U>();
-        //封装结果
+        // 返回结果
+        List<U> list = new LinkedList<>();
+        // 封装结果
         for (Tuple tuple : tuples) {
             U u = clazz.newInstance();
             for (Expression expression : qdc.getExpressions()) {
@@ -117,7 +148,7 @@ public class BaseService<T> {
             }
             list.add(u);
         }
-        //分页封装
+        // 分页封装
         return new PageResult<U>(list, pageNo, pageSize, jpaQuery.fetchCount());
     }
 
