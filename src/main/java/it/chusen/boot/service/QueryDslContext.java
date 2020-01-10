@@ -30,7 +30,7 @@ public class QueryDslContext {
         this.orderSpecifiers = new ArrayList<>();
     }
 
-    public QueryDslContext gfrom(EntityPath entityPath) {
+    public QueryDslContext from(EntityPath entityPath) {
         tables.put(entityPath, FIRST);
         return this;
     }
