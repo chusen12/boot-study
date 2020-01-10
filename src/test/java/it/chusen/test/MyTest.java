@@ -86,7 +86,7 @@ public class MyTest {
         queryDslContext.add(QPmBrandEntity.pmBrandEntity.brandName.as("brandName"));
 
         // 表
-        queryDslContext.table(QPmProductEntity.pmProductEntity)
+        queryDslContext.from(QPmProductEntity.pmProductEntity)
                 .innerJoin(QPmBrandEntity.pmBrandEntity)
                 .on(QPmProductEntity.pmProductEntity.brandId.eq(QPmBrandEntity.pmBrandEntity.id));
 
