@@ -13,6 +13,7 @@ import javax.persistence.PersistenceContext;
  * @date 2019/10/16 14:24
  */
 @Configuration
+
 public class JpaQueryFactory {
     @Autowired
     @PersistenceContext

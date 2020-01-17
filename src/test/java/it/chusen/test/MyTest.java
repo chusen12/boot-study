@@ -12,12 +12,14 @@ import it.chusen.boot.model.result.PageListMapResult;
 import it.chusen.boot.model.result.PageResult;
 import it.chusen.boot.model.vo.ProductVO;
 import it.chusen.boot.repository.ProductRepository;
+import it.chusen.boot.service.AutoImportService;
 import it.chusen.boot.service.ProductService;
 import it.chusen.boot.service.QueryDslContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import java.util.List;
  * @date 2020/1/7 9:30 下午
  */
 @RunWith(SpringRunner.class)
+@ActiveProfiles("local")
 @SpringBootTest(classes = BootApplication.class)
 public class MyTest {
 
@@ -41,6 +44,9 @@ public class MyTest {
 
     @Resource
     private ProductService productService;
+
+    @Resource
+    private AutoImportService autoImportService;
 
 
     @Test
@@ -110,6 +116,12 @@ public class MyTest {
         list.add(booleanExpression);
         PageResult<PmProductEntity> result = productService.queryDsl(0, 10, list, pmProductEntity, null);
         System.out.println(result);
+    }
+
+
+    @Test
+    public void testAuto() {
+        autoImportService.test();
     }
 
 }
