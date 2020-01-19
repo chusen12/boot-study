@@ -1,7 +1,12 @@
 package it.chusen.boot.service;
 
 import it.chusen.annotation.MyAnnotation;
+import it.chusen.boot.map.MyMap;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author chusen
@@ -10,9 +15,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class AutoImportService {
 
+
+
+    @Resource
+//    private Map<Integer, MyMap> testMap;
+
+    private List<MyMap> testList;
+
+
     @MyAnnotation(name = MyAnnotation.MyType.GXC)
     public void test() {
         System.out.println("this is test method!");
+//        for (Map.Entry<Integer, MyMap> entry : testMap.entrySet()) {
+//
+//            System.out.println(entry.getKey()+":" + entry.getValue());
+//        }
+        for (MyMap myMap : testList) {
+            System.out.println(myMap);
+        }
     }
 
 }
