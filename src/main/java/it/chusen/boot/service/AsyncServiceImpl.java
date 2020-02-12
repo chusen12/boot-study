@@ -2,7 +2,10 @@ package it.chusen.boot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.Future;
 
 /**
  * @author chusen
@@ -13,14 +16,17 @@ import org.springframework.stereotype.Service;
 public class AsyncServiceImpl implements AsyncService {
     @Override
     @Async
-    public void update() {
+    public Future<Boolean> update() {
         log.info("开始文件上传....");
+        long start = System.currentTimeMillis();
         try {
             Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        log.info("上传文件耗时: {}", System.currentTimeMillis() - start);
         log.info("文件上传结束");
+        return new AsyncResult<>(true);
     }
 
     @Override
@@ -30,13 +36,16 @@ public class AsyncServiceImpl implements AsyncService {
 
     @Override
     @Async
-    public void insert() {
+    public Future<Boolean> insert() {
         log.info("开始插入....");
+        long start = System.currentTimeMillis();
         try {
-            Thread.sleep(10000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        log.info("插入结束 耗时: {}", System.currentTimeMillis() - start);
         log.info("结束插入...");
+        return new AsyncResult<>(true);
     }
 }
